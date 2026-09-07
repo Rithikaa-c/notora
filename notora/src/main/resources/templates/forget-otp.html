@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notora | Forgot Password</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fadadd, #fdb7b9);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .otp-wrapper {
+            width: 95%;
+            max-width: 1000px;
+            height: 700px;
+            background: #fff;
+            border-radius: 26px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+        }
+
+        .left {
+            flex: 1;
+            background: linear-gradient(135deg, #fadadd, #fdb7b9);
+        }
+
+        .left img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .right {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #3a2e39;
+        }
+
+        p {
+            color: #6b7280;
+            margin: 12px 0 18px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1.5px solid #fbcfe8;
+            background: #fff7f3;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 16px;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .otp-inputs input {
+            width: 55px;
+            height: 55px;
+            text-align: center;
+            font-size: 22px;
+            border-radius: 12px;
+        }
+
+        .btn {
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #f472b6, #fb7185);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 14px 35px rgba(244,114,182,0.45);
+        }
+
+        .login-btn {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .login-btn a {
+            color: #f472b6;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .otp-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+            .left {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="otp-wrapper">
+
+    <!-- LEFT IMAGE -->
+    <div class="left">
+        <img src="/images/otpimage.png" alt="OTP Image">
+    </div>
+
+    <!-- RIGHT CONTENT -->
+    <div class="right">
+
+        <h2>Forgot Password?</h2>
+        <p>Verify your email using OTP and reset your password.</p>
+        <!-- ERROR MESSAGE -->
+        <div class="error" th:text="${error}"></div>
+
+        <!-- STEP 1: ENTER EMAIL -->
+        <form th:if="${step == 1}" action="/send-forgot-otp" method="post">
+            <input type="email" name="email" placeholder="Enter your registered email" required>
+            <button class="btn" type="submit">Send OTP</button>
+        </form>
+
+        <!-- STEP 2: ENTER OTP -->
+        <form th:if="${step == 2}" action="/verify-forgot-otp" method="post"
+              onsubmit="return submitOtp()">
+
+            <div class="otp-inputs">
+                <input maxlength="1" class="otp-box" autofocus>
+                <input maxlength="1" class="otp-box">
+                <input maxlength="1" class="otp-box">
+                <input maxlength="1" class="otp-box">
+                <input maxlength="1" class="otp-box">
+                <input maxlength="1" class="otp-box">
+            </div>
+
+            <input type="hidden" name="otp" id="otp">
+            <button class="btn" type="submit">Verify OTP</button>
+        </form>
+
+        <!-- STEP 3: RESET PASSWORD -->
+        <form th:if="${step == 3}" action="/reset-password" method="post"
+              onsubmit="return validatePassword()">
+
+            <input type="password" id="newPassword" name="newPassword"
+                   placeholder="New Password">
+
+            <p style="font-size:13px;color:#6b7280">
+                Must be 8+ chars, 1 number & 1 special character
+            </p>
+
+            <button class="btn" type="submit">Reset Password</button>
+
+            <div class="login-btn">
+                <a href="/login">Back to Login</a>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+<script>
+    const inputs = document.querySelectorAll(".otp-box");
+    const otpHidden = document.getElementById("otp");
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+            if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+    });
+
+    function submitOtp() {
+        let otp = "";
+        inputs.forEach(i => otp += i.value);
+        if (otp.length !== 6) {
+            alert("Enter complete 6-digit OTP");
+            return false;
+        }
+        otpHidden.value = otp;
+        return true;
+    }
+
+   function validatePassword() {
+    const pwd = document.getElementById("newPassword").value;
+    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/;
+
+    if (!regex.test(pwd)) {
+        document.querySelector(".error").innerText =
+            "Password must be at least 8 characters, include 1 number & 1 special character.";
+        return false;
+    }
+    return true;
+}
+
+</script>
+
+</body>
+</html>

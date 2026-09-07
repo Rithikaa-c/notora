@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notora | Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fadadd, #fdb7b9);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-wrapper {
+            width: 95%;
+            max-width: 1100px;
+            height: 650px;
+            background: #fff;
+            border-radius: 28px;
+            display: flex;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* LEFT IMAGE */
+        .left-section {
+            flex: 1;
+            background: linear-gradient(135deg, #fadadd, #fdb7b9);
+        }
+
+        .left-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* RIGHT FORM */
+        .right-section {
+            flex: 1;
+            padding: 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #f472b6;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 26px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 18px;
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%);
+            color: #f472b6;
+        }
+
+        .input-group input {
+            width: 90%;
+            padding: 14px 18px 14px 45px;
+            border-radius: 14px;
+            border: 1.5px solid #fbcfe8;
+            background: #fff7f3;
+            font-size: 15px;
+            outline: none;
+        }
+
+        /* SHOW PASSWORD */
+        .show-password {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        /* CAPTCHA DISPLAY (LIKE IMAGE 2) */
+        .captcha-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff7f3;
+            border: 1.5px solid #fbcfe8;
+            border-radius: 14px;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+        }
+
+        .captcha-text {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            user-select: none;
+        }
+
+        .refresh {
+            cursor: pointer;
+            color: #f472b6;
+            font-size: 18px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #f472b6, #fb7185);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .links {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #f472b6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .signup {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .signup a {
+            color: #f472b6;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .login-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+            .left-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+    <!-- LEFT IMAGE -->
+    <div class="left-section">
+        <img src="/images/imageregister.png" alt="Login Image">
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="right-section">
+
+        <h2>Welcome Back!</h2>
+        <div class="subtitle">Log in to continue to Notora</div>
+
+        <div id="errorMsg" class="error"></div>
+        <form action="/login" method="post" onsubmit="return validateLogin()">
+
+
+            <div class="input-group">
+                <i class="fa fa-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="Email Address">
+            </div>
+
+            <div class="input-group">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="password" name="password" placeholder="Password">
+            </div>
+
+            <!-- SHOW PASSWORD -->
+            <div class="show-password">
+                <input type="checkbox" onclick="togglePassword()"> Show Password
+            </div>
+
+            <div class="links">
+                <a href="/forget-otp">Forgot Password?</a>
+            </div>
+
+            <!-- CAPTCHA DISPLAY -->
+            <div class="captcha-display">
+                <span id="captcha" class="captcha-text"></span>
+                <i class="fa fa-rotate-right refresh" onclick="generateCaptcha()"></i>
+            </div>
+
+            <!-- CAPTCHA INPUT -->
+            <div class="input-group">
+
+                <input type="text" id="captchaInput" name="captcha" placeholder="Enter Captcha">
+            </div>
+
+            <button class="btn-login" type="submit">Log In</button>
+
+        </form>
+
+        <div class="signup">
+            Don’t have an account? <a href="/register">Sign Up</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    let generatedCaptcha = "";
+
+    function generateCaptcha() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        generatedCaptcha = "";
+        for (let i = 0; i < 6; i++) {
+            generatedCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById("captcha").innerText = generatedCaptcha;
+    }
+
+    function togglePassword() {
+        const pass = document.getElementById("password");
+        pass.type = pass.type === "password" ? "text" : "password";
+    }
+
+    function validateLogin() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const captchaInput = document.getElementById("captchaInput").value.trim();
+    const error = document.getElementById("errorMsg");
+
+    error.innerText = "";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+        error.innerText = "Please enter a valid email address.";
+        return false;
+    }
+
+    if (password.length < 6) {
+        error.innerText = "Password must be at least 6 characters.";
+        return false;
+    }
+
+    if (captchaInput !== generatedCaptcha) {
+        error.innerText = "Incorrect captcha.";
+        generateCaptcha();
+        return false;
+    }
+
+    // ✅ ALLOW FORM SUBMISSION
+    return true;
+}
+
+    generateCaptcha();
+</script>
+
+</body>
+</html>

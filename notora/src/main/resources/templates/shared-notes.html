@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Shared Notes | Notora</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: url('/images/background.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 45px 14px 14px;
+            border-radius: 14px;
+            border: 1px solid #fbcfe8;
+            font-size: 15px;
+            outline: none;
+        }
+
+        #clearBtn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #999;
+            display: none;
+        }
+
+        .note-card {
+            background: white;
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.12);
+            margin-bottom: 15px;
+        }
+
+        .note-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: none;
+            background: #f472b6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .file-link {
+            color: #ec4899;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .highlight {
+            background: #fde68a;
+            padding: 0 3px;
+            border-radius: 4px;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📚 Shared Notes</h2>
+
+    <!-- 🔍 SEARCH -->
+    <div class="search-wrapper">
+        <input id="searchInput" type="text"
+               placeholder="Search by subject or file name">
+        <span id="clearBtn">✕</span>
+    </div>
+
+    <div id="notesContainer"></div>
+</div>
+
+<script th:inline="javascript">
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+    const notesContainer = document.getElementById("notesContainer");
+    const loggedInUserId = [[${user.id}]];
+
+    let debounceTimer = null;
+
+    function highlight(text, keyword) {
+        if (!keyword) return text;
+        const regex = new RegExp(`(${keyword})`, "gi");
+        return text.replace(regex, `<span class="highlight">$1</span>`);
+    }
+
+    function renderNotes(notes, keyword = "") {
+        notesContainer.innerHTML = "";
+
+        if (!notes || notes.length === 0) {
+            notesContainer.innerHTML = `<div class="empty">No notes found</div>`;
+            return;
+        }
+
+        notes.forEach(note => {
+            const uploadedBy =
+                note.user.id === loggedInUserId ? "You" : note.user.fullName;
+
+            notesContainer.innerHTML += `
+                <div class="note-card">
+                    <h3>${highlight(note.subject, keyword)}</h3>
+
+                    <p>
+                        📄
+                        <a class="file-link" href="/preview/${note.id}">
+                            ${highlight(note.fileName, keyword)}
+                        </a>
+                    </p>
+
+                    <p>
+                        Uploaded by <b>${uploadedBy}</b><br>
+                        <small>${note.uploadedAt.replace("T"," ")}</small>
+                    </p>
+
+                    <div class="note-actions">
+                        <a href="/preview/${note.id}">
+                            <button>👁 Preview</button>
+                        </a>
+                        <a href="/download/${note.id}">
+                            <button>⬇ Download</button>
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function fetchNotes(keyword = "") {
+        fetch(`/api/notes/search?keyword=${encodeURIComponent(keyword)}`)
+            .then(res => res.json())
+            .then(data => renderNotes(data, keyword))
+            .catch(() => {
+                notesContainer.innerHTML =
+                    `<div class="empty">Something went wrong</div>`;
+            });
+    }
+
+    // initial load
+    fetchNotes("");
+
+    searchInput.addEventListener("input", () => {
+        const keyword = searchInput.value.trim();
+        clearBtn.style.display = keyword ? "block" : "none";
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fetchNotes(keyword);
+        }, 300);
+    });
+
+    clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        clearBtn.style.display = "none";
+        fetchNotes("");
+    });
+</script>
+
+</body>
+</html>
